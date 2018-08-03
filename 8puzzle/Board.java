@@ -1,8 +1,11 @@
 import java.util.ArrayList;
 
+
 public class Board {
     private int[][] blocks;
     private int dimension;
+    private int hammingVal;
+    private int manhattanVal;
 
     public Board(int[][] blocks){
         dimension = blocks.length;
@@ -12,14 +15,6 @@ public class Board {
                 this.blocks[i][j] = blocks[i][j];
             }
         }
-    }           // construct a board from an n-by-n array of blocks
-                                           // (where blocks[i][j] = block in row i, column j)
-    public int dimension(){
-        return dimension;
-    }                 // board dimension n
-
-
-    public int hamming(){
         int count = 0;
         for(int i = 0; i < dimension; i++){
             for(int j = 0; j < dimension; j++){
@@ -31,12 +26,8 @@ public class Board {
                 }
             }
         }
-        return count;
-    }                   // number of blocks out of place
-
-
-    public int manhattan(){
-        int count = 0;
+        hammingVal = count;
+        count = 0;
         int tx, ty;
         for(int i = 0; i < dimension; i++){
             for(int j = 0; j < dimension; j++){
@@ -50,7 +41,46 @@ public class Board {
                 }
             }
         }
-        return count;
+        manhattanVal = count;
+    }           // construct a board from an n-by-n array of blocks
+                                           // (where blocks[i][j] = block in row i, column j)
+    public int dimension(){
+        return dimension;
+    }                 // board dimension n
+
+
+    public int hamming(){
+        // int count = 0;
+        // for(int i = 0; i < dimension; i++){
+        //     for(int j = 0; j < dimension; j++){
+        //         if(blocks[i][j] == 0){
+        //             continue;
+        //         }
+        //         if(blocks[i][j] != i * dimension + j + 1){
+        //             count++;
+        //         }
+        //     }
+        // }
+        return hammingVal;
+    }                   // number of blocks out of place
+
+
+    public int manhattan(){
+        // int count = 0;
+        // int tx, ty;
+        // for(int i = 0; i < dimension; i++){
+        //     for(int j = 0; j < dimension; j++){
+        //         if(blocks[i][j] == 0){
+        //             continue;
+        //         }
+        //         if(blocks[i][j] != i * dimension + j + 1){
+        //             ty = Math.abs(i - (blocks[i][j] - 1) / dimension);
+        //             tx = Math.abs(j - (blocks[i][j] - 1) % dimension);
+        //             count = count + tx + ty;
+        //         }
+        //     }
+        // }
+        return manhattanVal;
     }                 // sum of Manhattan distances between blocks and goal
 
 
@@ -72,14 +102,28 @@ public class Board {
 
     public Board twin(){
         Board res = new Board(blocks);
-        int temp = res.blocks[0][0];
-        res.blocks[0][0] = res.blocks[0][1];
-        res.blocks[0][1] = temp;
+        int row = 0;
+        for (int i = 0; i < dimension; ++i) {
+            if (blocks[0][i] == 0) {
+                row = 1;
+                break;
+            }
+        }
+        int temp = res.blocks[row][0];
+        res.blocks[row][0] = res.blocks[row][1];
+        res.blocks[row][1] = temp;
         return res;
     }                    // a board that is obtained by exchanging any pair of blocks
 
 
     public boolean equals(Object y){
+        if(y == null)
+            return false;
+        if( y.getClass() != this.getClass()){
+            return false;
+        }
+        if(((Board)y).dimension != this.dimension)
+            return false;
         for(int i = 0; i < dimension; i++){
             for(int j = 0; j < dimension; j++){
                 if(blocks[i][j] != ((Board)y).blocks[i][j]){
@@ -110,6 +154,7 @@ public class Board {
                 swap = temp.blocks[tx][ty];
                 temp.blocks[tx][ty] = temp.blocks[tx - 1][ty];
                 temp.blocks[tx - 1][ty] =swap;
+                temp = new Board(temp.blocks);
                 neighbors.add(temp);
             }
             if(isValid(tx + 1, ty)){
@@ -117,6 +162,7 @@ public class Board {
                 swap = temp.blocks[tx][ty];
                 temp.blocks[tx][ty] = temp.blocks[tx + 1][ty];
                 temp.blocks[tx + 1][ty] =swap;
+                temp = new Board(temp.blocks);
                 neighbors.add(temp);
             }
             if(isValid(tx, ty - 1)){
@@ -124,6 +170,7 @@ public class Board {
                 swap = temp.blocks[tx][ty];
                 temp.blocks[tx][ty] = temp.blocks[tx][ty - 1];
                 temp.blocks[tx][ty - 1] =swap;
+                temp = new Board(temp.blocks);
                 neighbors.add(temp);
             }
             if(isValid(tx, ty + 1)){
@@ -131,6 +178,7 @@ public class Board {
                 swap = temp.blocks[tx][ty];
                 temp.blocks[tx][ty] = temp.blocks[tx][ty + 1];
                 temp.blocks[tx][ty + 1] =swap;
+                temp = new Board(temp.blocks);
                 neighbors.add(temp);
             }
             return neighbors;
@@ -146,6 +194,7 @@ public class Board {
 
     public String toString(){
         String output = new String("");
+        output = output + String.valueOf(dimension) + "\r\n";
         for(int i = 0; i < dimension; i++){
             for(int j = 0; j < dimension; j++){
                 output = output + " " + String.valueOf(blocks[i][j]) + " ";
